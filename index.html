@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>GTA VI — Contagem Regressiva Brasil</title>
+  <meta name="description" content="Contagem regressiva oficial feita por fãs para o lançamento de Grand Theft Auto VI no Brasil!" />
+
+  <!-- Fontes estilo Vice City / GTA -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700;900&family=Pacifico&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --vice-pink: #ff2a85;
+      --vice-magenta: #d91b86;
+      --vice-orange: #ff7b39;
+      --vice-gold: #ffbe4d;
+      --vice-cyan: #00f0ff;
+      --vice-purple: #280c4c;
+      --vice-dark: #0a0314;
+      --glass-bg: rgba(14, 5, 30, 0.62);
+      --glass-border: rgba(255, 255, 255, 0.16);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100dvh;
+      background-color: var(--vice-dark);
+      color: #ffffff;
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Esconde a seta padrão apenas em dispositivos com mouse */
+    @media (hover: hover) and (pointer: fine) {
+      *, *::before, *::after {
+        cursor: none !important;
+      }
+    }
+
+    /* ================= FUNDOS DINÂMICOS GTA VI ================= */
+    .bg-stage {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 30%, #3b0d54 0%, #120524 55%, #07020f 100%);
+    }
+
+    .bg-slide {
+      position: absolute;
+      inset: -4%;
+      width: 108%;
+      height: 108%;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transform: scale(1.04);
+      transition: opacity 2.2s ease-in-out, transform 10s ease-out;
+      will-change: opacity, transform;
+    }
+
+    .bg-slide.active {
+      opacity: 1;
+      transform: scale(1.11);
+    }
+
+    /* Vinheta e atmosfera Vice City */
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 25%, rgba(255, 42, 133, 0.20) 0%, transparent 55%),
+        radial-gradient(circle at 80% 80%, rgba(0, 240, 255, 0.16) 0%, transparent 50%),
+        linear-gradient(180deg, rgba(9, 3, 20, 0.55) 0%, rgba(12, 4, 26, 0.42) 45%, rgba(7, 2, 15, 0.88) 100%);
+    }
+
+    /* Granulação sutil estilo cinema / pôster Rockstar */
+    .film-grain {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.045;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* ================= CANVAS DE PARTÍCULAS DO MOUSE ================= */
+    #cursor-fx-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9998;
+      pointer-events: none;
+    }
+
+    /* ================= SETA DO MOUSE PERSONALIZADA ================= */
+    .custom-cursor-arrow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 30px;
+      height: 30px;
+      z-index: 10000;
+      pointer-events: none;
+      transform: translate3d(-100px, -100px, 0);
+      transition: transform 0.04s linear;
+      filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.9)) drop-shadow(0 0 16px rgba(255, 42, 133, 0.8));
+      display: none;
+    }
+
+    .custom-cursor-ring {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 240, 255, 0.75);
+      box-shadow: 0 0 15px rgba(255, 42, 133, 0.55), inset 0 0 10px rgba(0, 240, 255, 0.35);
+      z-index: 9999;
+      pointer-events: none;
+      transform: translate3d(-100px, -100px, 0);
+      transition: width 0.25s ease, height 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+      display: none;
+    }
+
+    .custom-cursor-ring.hovering {
+      width: 64px;
+      height: 64px;
+      border-color: var(--vice-pink);
+      background: rgba(255, 42, 133, 0.12);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .custom-cursor-arrow,
+      .custom-cursor-ring {
+        display: block;
+      }
+    }
+
+    /* ================= CONTEÚDO PRINCIPAL ================= */
+    .wrapper {
+      position: relative;
+      z-index: 10;
+      min-height: 100dvh;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 18px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    /* Topo: Badge & Estrelas de Procurado */
+    .top-bar {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      animation: fadeDown 0.8s ease-out both;
+    }
+
+    .release-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: rgba(15, 5, 32, 0.72);
+      border: 1px solid rgba(0, 240, 255, 0.45);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+      backdrop-filter: blur(12px);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: #e6fbff;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--vice-cyan);
+      box-shadow: 0 0 10px var(--vice-cyan);
+      animation: pulseDot 1.4s infinite ease-in-out;
+    }
+
+    .wanted-stars {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: rgba(15, 5, 32, 0.72);
+      border: 1px solid rgba(255, 42, 133, 0.4);
+      backdrop-filter: blur(12px);
+      font-size: 1rem;
+    }
+
+    .wanted-stars span {
+      color: #ffffff;
+      text-shadow: 0 0 10px var(--vice-pink), 0 0 20px var(--vice-orange);
+      animation: starTwinkle 2.4s infinite alternate;
+    }
+
+    .wanted-stars span:nth-child(2) { animation-delay: 0.3s; }
+    .wanted-stars span:nth-child(3) { animation-delay: 0.6s; }
+    .wanted-stars span:nth-child(4) { animation-delay: 0.9s; }
+    .wanted-stars span:nth-child(5) { animation-delay: 1.2s; }
+
+    /* Hero: Logo GTA VI */
+    .hero-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+      animation: scaleIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .logo-container {
+      position: relative;
+      width: clamp(230px, 42vw, 370px);
+      transition: transform 0.25s ease-out;
+      filter: drop-shadow(0 12px 32px rgba(255, 42, 133, 0.55))
+              drop-shadow(0 0 18px rgba(0, 240, 255, 0.35));
+    }
+
+    .logo-container img,
+    .logo-container svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .vice-script {
+      font-family: 'Pacifico', cursive;
+      font-size: clamp(1.25rem, 3.2vw, 1.95rem);
+      background: linear-gradient(90deg, var(--vice-cyan), #ffffff, var(--vice-pink), var(--vice-gold));
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradientFlow 5s linear infinite;
+      filter: drop-shadow(0 2px 12px rgba(255, 42, 133, 0.65));
+      margin-top: -6px;
+    }
+
+    .subtitle {
+      font-size: clamp(0.82rem, 2vw, 1rem);
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.88);
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    }
+
+    /* ================= GRADE DO CONTADOR ================= */
+    .countdown-grid {
+      width: 100%;
+      max-width: 880px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin: 6px 0;
+      animation: fadeUp 0.9s 0.15s ease-out both;
+    }
+
+    .time-card {
+      position: relative;
+      border-radius: 22px;
+      padding: 26px 14px 20px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--glass-border);
+      box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .time-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 22px;
+      padding: 2px;
+      background: linear-gradient(135deg, var(--vice-cyan), var(--vice-pink), var(--vice-orange));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0.65;
+      transition: opacity 0.3s ease;
+    }
+
+    .time-card::after {
+      content: "";
+      position: absolute;
+      top: -100%;
+      left: -60%;
+      width: 220%;
+      height: 60%;
+      background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+      transform: rotate(25deg);
+      animation: cardShine 6s infinite ease-in-out;
+      pointer-events: none;
+    }
+
+    .time-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow:
+        0 24px 50px rgba(255, 42, 133, 0.32),
+        0 0 28px rgba(0, 240, 255, 0.25);
+    }
+
+    .time-card:hover::before {
+      opacity: 1;
+    }
+
+    .time-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.4rem, 7.5vw, 5.6rem);
+      line-height: 0.95;
+      letter-spacing: 2px;
+      background: linear-gradient(180deg, #ffffff 20%, #ffd6ea 65%, #ff8cc6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 4px 16px rgba(255, 42, 133, 0.5));
+      transition: transform 0.18s ease;
+    }
+
+    .time-value.tick {
+      transform: scale(1.08);
+    }
+
+    .time-label {
+      margin-top: 8px;
+      font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--vice-cyan);
+      text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+    }
+
+    /* ================= FUSOS DO BRASIL & BARRA HYPE ================= */
+    .brazil-info-box {
+      width: 100%;
+      max-width: 780px;
+      background: rgba(12, 4, 26, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 18px;
+      padding: 14px 18px;
+      backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: fadeUp 0.9s 0.25s ease-out both;
+    }
+
+    .tz-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .tz-chip {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #d8d0e8;
+      transition: all 0.25s ease;
+    }
+
+    .tz-chip.active,
+    .tz-chip:hover {
+      background: linear-gradient(90deg, rgba(255, 42, 133, 0.35), rgba(0, 240, 255, 0.28));
+      border-color: var(--vice-cyan);
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
+    }
+
+    .hype-progress-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .hype-progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: rgba(255, 255, 255, 0.8);
+      text-transform: uppercase;
+    }
+
+    .hype-bar-track {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+
+    .hype-bar-fill {
+      height: 100%;
+      width: 99%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--vice-cyan), var(--vice-pink), var(--vice-gold));
+      background-size: 200% 100%;
+      animation: gradientFlow 3s linear infinite;
+      box-shadow: 0 0 12px var(--vice-pink);
+      transition: width 0.6s ease;
+    }
+
+    /* ================= BOTÕES DE AÇÃO ================= */
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      animation: fadeUp 0.9s 0.35s ease-out both;
+    }
+
+    .btn-vice {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 13px 22px;
+      border-radius: 999px;
+      border: none;
+      text-decoration: none;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #ffffff;
+      background: linear-gradient(135deg, var(--vice-pink) 0%, #c81d77 50%, var(--vice-orange) 100%);
+      box-shadow: 0 8px 25px rgba(255, 42, 133, 0.45);
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .btn-vice:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 12px 32px rgba(255, 42, 133, 0.7), 0 0 18px rgba(0, 240, 255, 0.4);
+    }
+
+    .btn-vice:active {
+      transform: scale(0.97);
+    }
+
+    .btn-store {
+      background: linear-gradient(135deg, #ff5722 0%, #ff7b39 50%, #ffbe4d 100%);
+      box-shadow: 0 8px 25px rgba(255, 123, 57, 0.48);
+    }
+
+    .btn-store:hover {
+      box-shadow: 0 12px 32px rgba(255, 190, 77, 0.7), 0 0 18px rgba(255, 87, 34, 0.45);
+    }
+
+    .btn-secondary {
+      background: rgba(15, 6, 32, 0.75);
+      border: 1px solid rgba(0, 240, 255, 0.5);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-secondary:hover {
+      border-color: #ffffff;
+      box-shadow: 0 10px 28px rgba(0, 240, 255, 0.38);
+    }
+
+    /* Indicador de cenas */
+    .scene-dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .scene-dot {
+      width: 26px;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.25);
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .scene-dot.active {
+      width: 42px;
+      background: linear-gradient(90deg, var(--vice-cyan), var(--vice-pink));
+      box-shadow: 0 0 10px var(--vice-cyan);
+    }
+
+    /* Banner de Lançado */
+    .launched-banner {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 24px 28px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, rgba(255, 42, 133, 0.3), rgba(0, 240, 255, 0.25));
+      border: 2px solid var(--vice-cyan);
+      box-shadow: 0 0 40px rgba(255, 42, 133, 0.55);
+      text-align: center;
+    }
+
+    .launched-banner.show {
+      display: flex;
+      animation: scaleIn 0.6s ease-out both;
+    }
+
+    .launched-banner h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 6vw, 3.6rem);
+      letter-spacing: 2px;
+      text-shadow: 0 0 20px var(--vice-pink);
+    }
+
+    /* Rodapé fan-made */
+    footer {
+      text-align: center;
+      font-size: 0.72rem;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.62);
+      max-width: 680px;
+    }
+
+    /* Toast de notificação estilo GTA */
+    .toast-gta {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      z-index: 10001;
+      padding: 12px 22px;
+      border-radius: 14px;
+      background: rgba(11, 4, 24, 0.92);
+      border: 1px solid var(--vice-cyan);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 18px rgba(0, 240, 255, 0.35);
+      color: #ffffff;
+      font-size: 0.84rem;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      text-align: center;
+      width: max-content;
+      max-width: 90vw;
+    }
+
+    .toast-gta.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ================= RESPONSIVIDADE CELULAR ================= */
+    @media (max-width: 640px) {
+      .wrapper {
+        padding: 16px 14px 22px;
+        gap: 14px;
+      }
+
+      .top-bar {
+        justify-content: center;
+      }
+
+      .release-pill {
+        font-size: 0.68rem;
+        padding: 7px 12px;
+        letter-spacing: 1px;
+      }
+
+      .countdown-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .time-card {
+        padding: 20px 10px 16px;
+        border-radius: 18px;
+      }
+
+      .time-label {
+        letter-spacing: 2px;
+      }
+
+      .actions-row {
+        width: 100%;
+      }
+
+      .btn-vice {
+        width: 100%;
+        justify-content: center;
+        padding: 13px 18px;
+        font-size: 0.8rem;
+      }
+    }
+
+    /* ================= KEYFRAMES ================= */
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.6); opacity: 0.45; }
+    }
+
+    @keyframes starTwinkle {
+      0% { opacity: 0.65; transform: scale(0.95); }
+      100% { opacity: 1; transform: scale(1.12); }
+    }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    @keyframes cardShine {
+      0%, 70% { top: -120%; }
+      100% { top: 160%; }
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.88); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cenários de Fundo Vice City / GTA VI -->
+  <div class="bg-stage" id="bgStage">
+    <div class="bg-slide active" id="slide0"></div>
+    <div class="bg-slide" id="slide1"></div>
+    <div class="bg-slide" id="slide2"></div>
+    <div class="bg-slide" id="slide3"></div>
+  </div>
+  <div class="bg-overlay"></div>
+  <div class="film-grain"></div>
+
+  <!-- Canvas de Partículas Interativas -->
+  <canvas id="cursor-fx-canvas"></canvas>
+
+  <!-- Seta do Mouse Personalizada (Desktop) -->
+  <div class="custom-cursor-ring" id="cursorRing"></div>
+  <div class="custom-cursor-arrow" id="cursorArrow">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="arrowGrad" x1="2" y1="2" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#00F0FF"/>
+          <stop offset="55%" stop-color="#FF2A85"/>
+          <stop offset="100%" stop-color="#FFBE4D"/>
+        </linearGradient>
+      </defs>
+      <path d="M4 3L27 14.5L16.8 18.2L13 28.5L4 3Z" fill="url(#arrowGrad)" stroke="#FFFFFF" stroke-width="2" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <!-- Conteúdo Principal -->
+  <main class="wrapper">
+    <!-- Barra Superior -->
+    <header class="top-bar">
+      <div class="release-pill">
+        <span class="live-dot"></span>
+        <span>Lançamento Brasil • 19 Nov 2026 • 00h00</span>
+      </div>
+      <div class="wanted-stars" title="Nível de Hype Máximo">
+        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+      </div>
+    </header>
+
+    <!-- Logo GTA VI -->
+    <section class="hero-section">
+      <div class="logo-container" id="logoTilt">
+        <!-- Logo Oficial via Wikimedia Commons com fallback automático em SVG fiel -->
+        <img
+          src="https://commons.wikimedia.org/wiki/Special:FilePath/Grand_Theft_Auto_VI_logo_(with_gradient).svg"
+          alt="Logo Oficial Grand Theft Auto VI"
+          onerror="this.style.display='none'; document.getElementById('fallbackGtaLogo').style.display='block';"
+        />
+        <!-- Fallback SVG em Alta Definição (caso offline) -->
+        <svg id="fallbackGtaLogo" style="display:none;" viewBox="0 0 620 420" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="viSunset" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#9B30FF"/>
+              <stop offset="42%" stop-color="#FF2A85"/>
+              <stop offset="78%" stop-color="#FF7B39"/>
+              <stop offset="100%" stop-color="#FFD166"/>
+            </linearGradient>
+            <filter id="neonStroke" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#090214" flood-opacity="0.9"/>
+            </filter>
+          </defs>
+          <!-- Numeral Romano VI -->
+          <g filter="url(#neonStroke)">
+            <path d="M125 65 H215 L275 275 L335 65 H425 L322 365 H228 L125 65 Z" fill="url(#viSunset)" stroke="#FFFFFF" stroke-width="6"/>
+            <rect x="442" y="65" width="76" height="300" rx="6" fill="url(#viSunset)" stroke="#FFFFFF" stroke-width="6"/>
+          </g>
+          <!-- Silhueta de Palmeiras dentro do VI -->
+          <path d="M265 362 C268 310 278 275 292 245 C270 248 250 258 238 272 C248 248 268 235 290 235 C272 224 252 224 236 232 C254 214 278 212 296 225 C304 210 322 204 340 210 C324 215 312 224 306 234 C324 232 340 240 350 254 C334 246 318 244 303 248 C292 278 285 315 283 362 Z" fill="#18062E" opacity="0.88"/>
+          <!-- Texto Grand Theft Auto -->
+          <g filter="url(#neonStroke)" fill="#FFFFFF" stroke="#0B0318" stroke-width="7" paint-order="stroke">
+            <text x="310" y="168" text-anchor="middle" font-family="'Bebas Neue', Impact, sans-serif" font-size="88" letter-spacing="4">GRAND</text>
+            <text x="310" y="242" text-anchor="middle" font-family="'Bebas Neue', Impact, sans-serif" font-size="88" letter-spacing="4">THEFT</text>
+            <text x="310" y="316" text-anchor="middle" font-family="'Bebas Neue', Impact, sans-serif" font-size="88" letter-spacing="6">AUTO</text>
+          </g>
+        </svg>
+      </div>
+
+      <p class="vice-script" id="sceneTitle">Vice City • Estado de Leonida</p>
+      <p class="subtitle">Tempo restante para jogar no Brasil</p>
+    </section>
+
+    <!-- Contador Regressivo -->
+    <section class="countdown-grid" id="countdownGrid" aria-label="Contagem regressiva">
+      <div class="time-card interactive-hover">
+        <span class="time-value" id="days">00</span>
+        <span class="time-label">Dias</span>
+      </div>
+      <div class="time-card interactive-hover">
+        <span class="time-value" id="hours">00</span>
+        <span class="time-label">Horas</span>
+      </div>
+      <div class="time-card interactive-hover">
+        <span class="time-value" id="minutes">00</span>
+        <span class="time-label">Minutos</span>
+      </div>
+      <div class="time-card interactive-hover">
+        <span class="time-value" id="seconds">00</span>
+        <span class="time-label">Segundos</span>
+      </div>
+    </section>
+
+    <!-- Mensagem quando chegar a zero -->
+    <section class="launched-banner" id="launchedBanner">
+      <h2>🌴 BEM-VINDO A VICE CITY! 🌴</h2>
+      <p>GTA VI já está liberado no Brasil! Pegue o controle e aproveite Leonida!</p>
+    </section>
+
+    <!-- Horários por Região do Brasil & Barra de Hype -->
+    <section class="brazil-info-box">
+      <div class="tz-row" id="tzSelector">
+        <button class="tz-chip active interactive-hover" data-label="Brasília / SP / RJ / Sul / NE — 19/11 às 00h00">
+          🇧🇷 Brasília (00h00)
+        </button>
+        <button class="tz-chip interactive-hover" data-label="Amazonas / MT / MS / RO / RR — 18/11 às 23h00">
+          🌿 Amazonas / MS / MT (23h00)
+        </button>
+        <button class="tz-chip interactive-hover" data-label="Acre — 18/11 às 22h00">
+          🌴 Acre (22h00)
+        </button>
+        <button class="tz-chip interactive-hover" data-label="Fernando de Noronha — 19/11 às 01h00">
+          🏝️ Noronha (01h00)
+        </button>
+      </div>
+
+      <div class="hype-progress-wrap">
+        <div class="hype-progress-header">
+          <span id="selectedRegionText">Brasília / SP / RJ / Sul / NE — 19/11 às 00h00</span>
+          <span id="hypePercent">99.9%</span>
+        </div>
+        <div class="hype-bar-track">
+          <div class="hype-bar-fill" id="hypeBarFill"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Botões de Ação e Seletor de Cenário -->
+    <section class="actions-row">
+      <button class="btn-vice interactive-hover" id="shareBtn">
+        <span>📲 Compartilhar com Amigos</span>
+      </button>
+      <a href="https://br.shp.ee/7yHL6tU4" target="_blank" rel="noopener noreferrer" class="btn-vice btn-store interactive-hover" id="storeBtn">
+        <span>🛍️ Visitar Loja</span>
+      </a>
+      <button class="btn-vice btn-secondary interactive-hover" id="nextSceneBtn">
+        <span>🌅 Trocar Fundo Vice City</span>
+      </button>
+    </section>
+
+    <div class="scene-dots" id="sceneDots" aria-label="Selecionar cenário de fundo">
+      <button class="scene-dot active interactive-hover" data-index="0" title="Vice Beach Sunset"></button>
+      <button class="scene-dot interactive-hover" data-index="1" title="Ocean Drive Neon"></button>
+      <button class="scene-dot interactive-hover" data-index="2" title="Leonida Keys Highway"></button>
+      <button class="scene-dot interactive-hover" data-index="3" title="Downtown Vice City"></button>
+    </div>
+
+    <!-- Rodapé -->
+    <footer>
+      O jogo mais aguardado do ano!
+    </footer>
+  </main>
+
+  <!-- Toast de Notificação -->
+  <div class="toast-gta" id="toastGta"></div>
+
+  <script>
+    /* =========================================================================
+       1. GERADOR DE CENÁRIOS VICE CITY / GTA VI EM ALTA DEFINIÇÃO (ZERO FALHAS)
+       ========================================================================= */
+    const SCENES = [
+      { title: "Vice Beach Sunset • Leonida", type: "sunset" },
+      { title: "Ocean Drive Neon Nights", type: "neon" },
+      { title: "Leonida Keys Highway", type: "keys" },
+      { title: "Downtown Vice City Skyline", type: "skyline" }
+    ];
+
+    function generateViceCityWallpaper(type) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1600;
+      canvas.height = 900;
+      const ctx = canvas.getContext("2d");
+
+      // Céu degradê por cena
+      const sky = ctx.createLinearGradient(0, 0, 0, 620);
+      if (type === "sunset") {
+        sky.addColorStop(0, "#14062b");
+        sky.addColorStop(0.32, "#61135f");
+        sky.addColorStop(0.65, "#ff2a85");
+        sky.addColorStop(0.88, "#ff7b39");
+        sky.addColorStop(1, "#ffd166");
+      } else if (type === "neon") {
+        sky.addColorStop(0, "#050212");
+        sky.addColorStop(0.45, "#19073b");
+        sky.addColorStop(0.8, "#4c1169");
+        sky.addColorStop(1, "#00b4d8");
+      } else if (type === "keys") {
+        sky.addColorStop(0, "#0d0829");
+        sky.addColorStop(0.4, "#3c1361");
+        sky.addColorStop(0.75, "#e83f6f");
+        sky.addColorStop(1, "#ff9f1c");
+      } else {
+        sky.addColorStop(0, "#070318");
+        sky.addColorStop(0.5, "#240b4c");
+        sky.addColorStop(0.85, "#9d176f");
+        sky.addColorStop(1, "#00f0ff");
+      }
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, 1600, 900);
+
+      // Estrelas no topo do céu
+      for (let i = 0; i < 110; i++) {
+        const sx = (i * 197) % 1600;
+        const sy = (i * 83) % 340;
+        const r = (i % 3) * 0.6 + 0.5;
+        ctx.fillStyle = `rgba(255,255,255,${0.25 + (i % 5) * 0.12})`;
+        ctx.beginPath();
+        ctx.arc(sx, sy, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Sol retrô gigante (nas cenas sunset e keys)
+      if (type === "sunset" || type === "keys") {
+        const sunX = type === "sunset" ? 800 : 1080;
+        const sunY = type === "sunset" ? 470 : 450;
+        const sunR = type === "sunset" ? 210 : 165;
+        const sunGrad = ctx.createLinearGradient(0, sunY - sunR, 0, sunY + sunR);
+        sunGrad.addColorStop(0, "#fff3b0");
+        sunGrad.addColorStop(0.45, "#ff9e00");
+        sunGrad.addColorStop(1, "#ff2a85");
+
+        ctx.save();
+        ctx.shadowColor = "#ff2a85";
+        ctx.shadowBlur = 70;
+        ctx.fillStyle = sunGrad;
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, sunR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // Cortes horizontais estilo synthwave na base do sol
+        ctx.fillStyle = type === "sunset" ? "#ff5e62" : "#c92a6d";
+        for (let s = 0; s < 5; s++) {
+          const ySlice = sunY + 45 + s * 28;
+          ctx.fillRect(sunX - sunR, ySlice, sunR * 2, 4 + s * 2.2);
+        }
+      }
+
+      // Oceano / Baía de Vice City
+      const waterY = 560;
+      const sea = ctx.createLinearGradient(0, waterY, 0, 900);
+      sea.addColorStop(0, type === "neon" ? "#0b133b" : "#2b0938");
+      sea.addColorStop(0.4, "#120624");
+      sea.addColorStop(1, "#06010d");
+      ctx.fillStyle = sea;
+      ctx.fillRect(0, waterY, 1600, 340);
+
+      // Reflexos neon na água
+      for (let w = 0; w < 65; w++) {
+        const wy = waterY + 8 + w * 5;
+        const width = 90 + Math.sin(w * 0.7) * 140 + (w * 4);
+        const cx = (type === "keys" ? 1080 : 800) + Math.sin(w * 1.3) * 45;
+        ctx.fillStyle = w % 2 === 0
+          ? "rgba(255, 42, 133, 0.24)"
+          : "rgba(0, 240, 255, 0.20)";
+        ctx.fillRect(cx - width / 2, wy, width, 2.2);
+      }
+
+      // Prédios / Skyline de Vice City
+      const buildings = [
+        [60, 340, 95, 220], [165, 280, 110, 280], [290, 380, 85, 180],
+        [390, 240, 125, 320], [530, 310, 95, 250], [980, 290, 115, 270],
+        [1110, 210, 135, 350], [1260, 330, 100, 230], [1375, 260, 120, 300],
+        [1505, 350, 95, 210]
+      ];
+
+      buildings.forEach(([bx, by, bw, bh], idx) => {
+        ctx.fillStyle = "#0b0418";
+        ctx.fillRect(bx, by, bw, bh);
+
+        // Faixa neon vertical/topo estilo Art Deco
+        ctx.fillStyle = idx % 2 === 0 ? "#00f0ff" : "#ff2a85";
+        ctx.fillRect(bx + 6, by + 10, 3, bh - 20);
+        ctx.fillRect(bx, by, bw, 4);
+
+        // Janelas iluminadas
+        ctx.fillStyle = "rgba(255, 214, 153, 0.28)";
+        for (let wy = by + 24; wy < by + bh - 16; wy += 18) {
+          for (let wx = bx + 18; wx < bx + bw - 14; wx += 16) {
+            if ((wx + wy + idx) % 3 === 0) {
+              ctx.fillRect(wx, wy, 7, 9);
+            }
+          }
+        }
+      });
+
+      // Ponte Leonida Keys (se cena keys)
+      if (type === "keys") {
+        ctx.strokeStyle = "#120624";
+        ctx.lineWidth = 14;
+        ctx.beginPath();
+        ctx.moveTo(0, 620);
+        ctx.quadraticCurveTo(800, 520, 1600, 610);
+        ctx.stroke();
+
+        // Luzes dos postes na ponte
+        for (let px = 40; px < 1580; px += 48) {
+          const py = 568 + Math.pow((px - 800) / 800, 2) * 48;
+          ctx.fillStyle = px % 96 === 0 ? "#00f0ff" : "#ffbe4d";
+          ctx.beginPath();
+          ctx.arc(px, py, 3.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // Silhuetas de Palmeiras em primeiro plano
+      function drawPalm(baseX, baseY, height, curve, scale) {
+        ctx.save();
+        ctx.fillStyle = "#070211";
+        ctx.strokeStyle = "#070211";
+        ctx.lineWidth = 14 * scale;
+        ctx.lineCap = "round";
+
+        const topX = baseX + curve;
+        const topY = baseY - height;
+
+        ctx.beginPath();
+        ctx.moveTo(baseX, baseY);
+        ctx.quadraticCurveTo(baseX + curve * 0.4, baseY - height * 0.55, topX, topY);
+        ctx.stroke();
+
+        // Folhas
+        const angles = [-2.6, -2.0, -1.3, -0.5, 0.2, 0.8, 2.3];
+        angles.forEach((ang) => {
+          const len = 125 * scale;
+          const endX = topX + Math.cos(ang) * len;
+          const endY = topY + Math.sin(ang) * len + 36 * scale;
+          ctx.beginPath();
+          ctx.moveTo(topX, topY);
+          ctx.quadraticCurveTo(
+            topX + Math.cos(ang) * len * 0.55,
+            topY + Math.sin(ang) * len * 0.35 - 18 * scale,
+            endX,
+            endY
+          );
+          ctx.lineWidth = 7 * scale;
+          ctx.stroke();
+        });
+        ctx.restore();
+      }
+
+      drawPalm(140, 910, 470, 85, 1.15);
+      drawPalm(290, 910, 340, -60, 0.85);
+      drawPalm(1460, 910, 490, -95, 1.2);
+      drawPalm(1310, 910, 330, 55, 0.8);
+
+      return canvas.toDataURL("image/jpeg", 0.88);
+    }
+
+    // Inicializa os 4 planos de fundo
+    let currentScene = 0;
+    const slides = SCENES.map((scene, idx) => {
+      const el = document.getElementById(`slide${idx}`);
+      el.style.backgroundImage = `url('${generateViceCityWallpaper(scene.type)}')`;
+      return el;
+    });
+
+    const dots = Array.from(document.querySelectorAll(".scene-dot"));
+    const sceneTitleEl = document.getElementById("sceneTitle");
+
+    function setScene(index) {
+      slides[currentScene].classList.remove("active");
+      dots[currentScene].classList.remove("active");
+      currentScene = (index + SCENES.length) % SCENES.length;
+      slides[currentScene].classList.add("active");
+      dots[currentScene].classList.add("active");
+      sceneTitleEl.textContent = SCENES[currentScene].title;
+    }
+
+    let autoSlideTimer = setInterval(() => setScene(currentScene + 1), 7500);
+
+    document.getElementById("nextSceneBtn").addEventListener("click", () => {
+      setScene(currentScene + 1);
+      clearInterval(autoSlideTimer);
+      autoSlideTimer = setInterval(() => setScene(currentScene + 1), 7500);
+    });
+
+    dots.forEach((dot) => {
+      dot.addEventListener("click", () => {
+        setScene(Number(dot.dataset.index));
+        clearInterval(autoSlideTimer);
+        autoSlideTimer = setInterval(() => setScene(currentScene + 1), 7500);
+      });
+    });
+
+    /* =========================================================================
+       2. CONTAGEM REGRESSIVA OFICIAL BRASIL (19 NOV 2026 - 00:00 BRT / UTC-3)
+       ========================================================================= */
+    // Instante exato do lançamento simultâneo no Brasil (00h00 Brasília / 23h00 AM / 22h00 AC)
+    const RELEASE_TIMESTAMP = new Date("2026-11-19T00:00:00-03:00").getTime();
+    // Base para barra de progresso (início do pré-carregamento / semana de lançamento)
+    const HYPE_START_TIMESTAMP = new Date("2026-11-10T00:00:00-03:00").getTime();
+
+    const daysEl = document.getElementById("days");
+    const hoursEl = document.getElementById("hours");
+    const minutesEl = document.getElementById("minutes");
+    const secondsEl = document.getElementById("seconds");
+    const hypeBarFill = document.getElementById("hypeBarFill");
+    const hypePercentEl = document.getElementById("hypePercent");
+
+    let lastValues = { d: "", h: "", m: "", s: "" };
+
+    function animateDigit(el, newVal, key) {
+      if (lastValues[key] !== newVal) {
+        el.textContent = newVal;
+        el.classList.remove("tick");
+        void el.offsetWidth; // força reflow
+        el.classList.add("tick");
+        setTimeout(() => el.classList.remove("tick"), 180);
+        lastValues[key] = newVal;
+      }
+    }
+
+    function updateCountdown() {
+      const now = Date.now();
+      const diff = RELEASE_TIMESTAMP - now;
+
+      if (diff <= 0) {
+        animateDigit(daysEl, "00", "d");
+        animateDigit(hoursEl, "00", "h");
+        animateDigit(minutesEl, "00", "m");
+        animateDigit(secondsEl, "00", "s");
+        document.getElementById("launchedBanner").classList.add("show");
+        hypeBarFill.style.width = "100%";
+        hypePercentEl.textContent = "100% LIBERADO!";
+        return;
+      }
+
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((diff / (1000 * 60)) % 60);
+      const s = Math.floor((diff / 1000) % 60);
+
+      animateDigit(daysEl, String(d).padStart(2, "0"), "d");
+      animateDigit(hoursEl, String(h).padStart(2, "0"), "h");
+      animateDigit(minutesEl, String(m).padStart(2, "0"), "m");
+      animateDigit(secondsEl, String(s).padStart(2, "0"), "s");
+
+      // Atualiza barra de hype
+      const totalSpan = RELEASE_TIMESTAMP - HYPE_START_TIMESTAMP;
+      const elapsed = Math.max(0, now - HYPE_START_TIMESTAMP);
+      const pct = Math.min(99.99, Math.max(12, (elapsed / totalSpan) * 100));
+      hypeBarFill.style.width = `${pct.toFixed(2)}%`;
+      hypePercentEl.textContent = `${pct.toFixed(1)}% HYPE`;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 250);
+
+    // Seletor de fuso brasileiro
+    const tzChips = document.querySelectorAll(".tz-chip");
+    const selectedRegionText = document.getElementById("selectedRegionText");
+
+    tzChips.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        tzChips.forEach((c) => c.classList.remove("active"));
+        chip.classList.add("active");
+        selectedRegionText.textContent = chip.dataset.label;
+      });
+    });
+
+    /* =========================================================================
+       3. COMPARTILHAR COM OS AMIGOS (WHATSAPP / ÁREA DE TRANSFERÊNCIA)
+       ========================================================================= */
+    const toastGta = document.getElementById("toastGta");
+    let toastTimer;
+
+    function showToast(msg) {
+      toastGta.textContent = msg;
+      toastGta.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastGta.classList.remove("show"), 3200);
+    }
+
+    document.getElementById("shareBtn").addEventListener("click", async () => {
+      const d = daysEl.textContent;
+      const h = hoursEl.textContent;
+      const m = minutesEl.textContent;
+      const s = secondsEl.textContent;
+
+      const text = `🌴🔥 O novo GTA VI finalmente chegou! Adquira seu kit para entrar no tema: https://br.shp.ee/7yHL6tU4`;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: "Contagem Regressiva GTA VI Brasil",
+            text
+          });
+          return;
+        } catch (_) {}
+      }
+
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast("📋 Mensagem copiada! Cole no grupo dos amigos!");
+      } catch (_) {
+        showToast("🌴 GTA VI chega dia 19/11 às 00h00 no Brasil!");
+      }
+    });
+
+    /* =========================================================================
+       4. SETA DO MOUSE ANIMADA + RASTRO NEON + PARALLAX 3D
+       ========================================================================= */
+    const cursorArrow = document.getElementById("cursorArrow");
+    const cursorRing = document.getElementById("cursorRing");
+    const logoTilt = document.getElementById("logoTilt");
+    const bgStage = document.getElementById("bgStage");
+
+    const fxCanvas = document.getElementById("cursor-fx-canvas");
+    const fxCtx = fxCanvas.getContext("2d");
+
+    function resizeFxCanvas() {
+      fxCanvas.width = window.innerWidth;
+      fxCanvas.height = window.innerHeight;
+    }
+    resizeFxCanvas();
+    window.addEventListener("resize", resizeFxCanvas);
+
+    let mouseX = -100, mouseY = -100;
+    let ringX = -100, ringY = -100;
+    let prevMouseX = -100, prevMouseY = -100;
+    let arrowAngle = 0;
+
+    const particles = [];
+    const shockwaves = [];
+    const NEON_COLORS = ["#00F0FF", "#FF2A85", "#FFBE4D", "#FF7B39"];
+
+    function spawnParticles(x, y, count = 3, burst = false) {
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = burst ? (Math.random() * 4.5 + 1.5) : (Math.random() * 1.4 + 0.3);
+        particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - (burst ? 0 : 0.4),
+          size: burst ? (Math.random() * 4 + 2) : (Math.random() * 2.8 + 1.2),
+          alpha: 1,
+          decay: burst ? (Math.random() * 0.025 + 0.02) : (Math.random() * 0.035 + 0.025),
+          color: NEON_COLORS[Math.floor(Math.random() * NEON_COLORS.length)]
+        });
+      }
+    }
+
+    function spawnShockwave(x, y) {
+      shockwaves.push({
+        x,
+        y,
+        radius: 6,
+        maxRadius: 68,
+        alpha: 0.9,
+        color: Math.random() > 0.5 ? "#00F0FF" : "#FF2A85"
+      });
+    }
+
+    // Movimento do mouse (Desktop)
+    window.addEventListener("mousemove", (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+
+      const dx = mouseX - prevMouseX;
+      const dy = mouseY - prevMouseY;
+      prevMouseX = mouseX;
+      prevMouseY = mouseY;
+
+      // Inclinação dinâmica da seta conforme velocidade horizontal
+      const targetAngle = Math.max(-22, Math.min(22, dx * 0.85));
+      arrowAngle += (targetAngle - arrowAngle) * 0.35;
+
+      cursorArrow.style.transform = `translate3d(${mouseX - 4}px, ${mouseY - 3}px, 0) rotate(${arrowAngle}deg)`;
+
+      if (Math.hypot(dx, dy) > 2) {
+        spawnParticles(mouseX + 6, mouseY + 6, 2, false);
+      }
+
+      // Efeito Parallax suave no fundo e na logo
+      const normX = (mouseX / window.innerWidth - 0.5) * 2;
+      const normY = (mouseY / window.innerHeight - 0.5) * 2;
+      bgStage.style.transform = `translate3d(${-normX * 12}px, ${-normY * 10}px, 0)`;
+      logoTilt.style.transform = `perspective(700px) rotateY(${normX * 7}deg) rotateX(${-normY * 6}deg)`;
+    });
+
+    // Clique / Toque gera onda neon + explosão de faíscas
+    window.addEventListener("pointerdown", (e) => {
+      spawnShockwave(e.clientX, e.clientY);
+      spawnParticles(e.clientX, e.clientY, 14, true);
+    });
+
+    // Expansão do anel ao passar sobre elementos clicáveis
+    document.querySelectorAll(".interactive-hover, button").forEach((el) => {
+      el.addEventListener("mouseenter", () => cursorRing.classList.add("hovering"));
+      el.addEventListener("mouseleave", () => cursorRing.classList.remove("hovering"));
+    });
+
+    // Loop de animação a 60fps
+    function renderFxLoop() {
+      fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+
+      // Suavização magnética do anel externo da seta
+      ringX += (mouseX - ringX) * 0.18;
+      ringY += (mouseY - ringY) * 0.18;
+      const ringOffset = cursorRing.classList.contains("hovering") ? 32 : 22;
+      cursorRing.style.transform = `translate3d(${ringX - ringOffset}px, ${ringY - ringOffset}px, 0)`;
+
+      // Desenha partículas neon
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= p.decay;
+
+        if (p.alpha <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        fxCtx.save();
+        fxCtx.globalAlpha = p.alpha;
+        fxCtx.fillStyle = p.color;
+        fxCtx.shadowColor = p.color;
+        fxCtx.shadowBlur = 10;
+        fxCtx.beginPath();
+        fxCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        fxCtx.fill();
+        fxCtx.restore();
+      }
+
+      // Desenha ondas de choque de clique
+      for (let i = shockwaves.length - 1; i >= 0; i--) {
+        const sw = shockwaves[i];
+        sw.radius += (sw.maxRadius - sw.radius) * 0.14;
+        sw.alpha -= 0.035;
+
+        if (sw.alpha <= 0) {
+          shockwaves.splice(i, 1);
+          continue;
+        }
+
+        fxCtx.save();
+        fxCtx.globalAlpha = sw.alpha;
+        fxCtx.strokeStyle = sw.color;
+        fxCtx.shadowColor = sw.color;
+        fxCtx.shadowBlur = 14;
+        fxCtx.lineWidth = 2.5;
+        fxCtx.beginPath();
+        fxCtx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+        fxCtx.stroke();
+        fxCtx.restore();
+      }
+
+      requestAnimationFrame(renderFxLoop);
+    }
+
+    renderFxLoop();
+  </script>
+</body>
+</html>
